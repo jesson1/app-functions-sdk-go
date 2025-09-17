@@ -151,11 +151,15 @@ func (processor *ConfigUpdateProcessor) processConfigChangedPipeline() {
 		sdk.runtime.TargetType = sdk.targetType
 
 		// Update the pipelines with their new transforms
-		for _, pipeline := range pipelines {
-			// TODO: Look at better way to apply pipeline updates
-			sdk.runtime.SetFunctionsPipelineTransforms(pipeline.Id, pipeline.Transforms)
-			sdk.runtime.SetFunctionsPipelineTopics(pipeline.Id, pipeline.Topics)
+		for i, pipline := range pipelines {
+			var fullTopics []string
+			for _, topic := range pipline.Topics {
+				fullTopics = append(fullTopics, coreCommon.BuildTopic(sdk.config.MessageBus.GetBaseTopicPrefix(), topic))
+			}
+			pipline.Topics = fullTopics
+			pipelines[i] = pipline
 		}
+		sdk.runtime.UpdateFunctionsPipelines(pipelines)
 
 		sdk.LoggingClient().Info("Configurable Pipeline successfully reloaded from new configuration")
 	}
@@ -188,4 +192,14 @@ func (svc *Service) findMatchingFunction(configurable reflect.Value, functionNam
 
 	functionType := functionValue.Type()
 	return functionValue, functionType, nil
+}
+
+func (svc *Service) findMatchingFunctionWrapper(configurables []reflect.Value, functionName string) (functionValue reflect.Value, functionType reflect.Type, err error) {
+	for _, conconfigurable := range configurables {
+		functionValue, functionType, err = svc.findMatchingFunction(conconfigurable, functionName)
+		if err == nil {
+			return
+		}
+	}
+	return
 }

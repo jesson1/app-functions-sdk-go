@@ -193,4 +193,12 @@ type ApplicationService interface {
 	Publish(data any, contentType string) error
 	// PublishWithTopic pushes data to the MessageBus using given topic
 	PublishWithTopic(topic string, data any, contentType string) error
+
+	RegisterExternalConfigurable(name string, f ConfigurableFactory) 
+	UnregisterExternalConfigurable(name string)
 }
+
+// ConfigurableFactory creates a configurable instance given SDK logging/secret provider.
+// Returned value should be a pointer to a struct whose methods have signature
+//   FuncName(parameters map[string]string) interfaces.AppFunction
+type ConfigurableFactory func(svc ApplicationService) (interface{}, error)
