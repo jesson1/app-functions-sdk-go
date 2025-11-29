@@ -177,10 +177,14 @@ func (fpr *FunctionsPipelineRuntime) UpdateFunctionsPipelines(piplines map[strin
 	}
 	for _, toAdd := range piplines {
 		pipeline := NewFunctionPipeline(toAdd.Id, toAdd.Topics, toAdd.Transforms)
+		_, exists := fpr.pipelines[toAdd.Id]
 		fpr.pipelines[toAdd.Id] = &pipeline
-		fpr.registerPipelineMetric(metricManager, internal.PipelineMessagesProcessedName, pipeline.Id, pipeline.MessagesProcessed)
-		fpr.registerPipelineMetric(metricManager, internal.PipelineMessageProcessingTimeName, pipeline.Id, pipeline.MessageProcessingTime)
-		fpr.registerPipelineMetric(metricManager, internal.PipelineProcessingErrorsName, pipeline.Id, pipeline.ProcessingErrors)
+		if !exists {
+			fpr.registerPipelineMetric(metricManager, internal.PipelineMessagesProcessedName, pipeline.Id, pipeline.MessagesProcessed)
+			fpr.registerPipelineMetric(metricManager, internal.PipelineMessageProcessingTimeName, pipeline.Id, pipeline.MessageProcessingTime)
+			fpr.registerPipelineMetric(metricManager, internal.PipelineProcessingErrorsName, pipeline.Id, pipeline.ProcessingErrors)
+		}
+
 	}
 }
 
