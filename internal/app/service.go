@@ -296,7 +296,9 @@ func (svc *Service) LoadConfigurableFunctionPipelines() (map[string]interfaces.F
 	defaultExecutionOrder := strings.TrimSpace(pipelineConfig.ExecutionOrder)
 
 	if len(defaultExecutionOrder) == 0 && len(pipelineConfig.PerTopicPipelines) == 0 {
-		return nil, errors.New("default ExecutionOrder has 0 functions specified and PerTopicPipelines is empty")
+		svc.lc.Warn("not found defaultExecutionOrder or PerTopicPipelines, all pipelines will be deleted")
+		return pipelines, nil
+		// return nil, errors.New("default ExecutionOrder has 0 functions specified and PerTopicPipelines is empty")
 	}
 
 	if len(defaultExecutionOrder) > 0 {
